@@ -6,7 +6,7 @@ using Documenter, MarkdownMetadata
 makedocs(
     modules = [MarkdownMetadata],
     format = Documenter.HTML(),
-    sitename = "MarkdownMetadata Documentation",
+    sitename = "MarkdownMetadata.jl",
     pages = [
         "Home" => "index.md",
         "API Reference" => [
