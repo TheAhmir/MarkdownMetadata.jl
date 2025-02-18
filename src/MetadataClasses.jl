@@ -5,7 +5,7 @@ using Dates
 export MetadataCategory, MetadataContainer, get_allowed_types
 
 # only allow specific values that are accepted in markdown, Yaml, Toml, JSON, and Latex
-const ALLOWED_TYPES = Union{String, Int, Float64, Bool, Dates.Date, Vector{String}}
+const ALLOWED_TYPES = Union{String, Int, Float64, Bool, Dates.Date, Dates.DateTime, Vector{String}}
 
 # function to get allowed types
 """
@@ -61,9 +61,7 @@ struct MetadataContainer
             if contains(key, " ")
                 error("Whitespace are not allowed in key names.")
             elseif key in seen_keys
-                println("Made it here #1")
                 error("All keys must be unique.")
-                println("made it here #2")
             else
                 push!(seen_keys, key)
                 new_item = MetadataCategory(key, typeof(value))

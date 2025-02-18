@@ -11,13 +11,13 @@ const allowed_types = get_allowed_types()
 """
     add_metadata(parent::MetadataContainer, key::MetadataCategory, value::Any)
 
-add singular MetadataCategory + value pair to MetadataContainer object.
+Add singular MetadataCategory + value pair to MetadataContainer object.
 """
 function add_metadata(parent::MetadataContainer, key::MetadataCategory, value::Any)
     keys = first.(parent.metadata)
     if key.datatype != typeof(value)
         error("Value is of incorrect type. Expected type: $(key.datatype).")
-    elseif key.name in keys
+    elseif key.name in [x.name for x in keys]
         error("Invalid key name: $(key.name) category already exists in metadata.")
     else
         push!(parent.metadata, (key => value))
@@ -25,8 +25,21 @@ function add_metadata(parent::MetadataContainer, key::MetadataCategory, value::A
 end
 
 # add singular (category, value) pair using a string
-# function add_metadata(parent::MetadataContainer, key::String, value::Any)
-# end
+"""
+    add_metadata(parent::MetadataContainer, key::String, value::Any)
+
+Add singular MetadataCategory + value pair to MetadataContainer object using String.
+"""
+function add_metadata(parent::MetadataContainer, key::String, value::Any)
+    # check for duplicates
+    keys = [x.name for x in first.(parent.metadata)]
+    if key in keys
+        error("Invalid key name: $(key) category alread exists in metadata.")
+    else
+        new_item = MetadataCategory(key, typeof(value))
+        push!(parent.metadata, (new_item => value))
+    end
+end
 
 # add multiple (category, value) pairs at once
 """
@@ -35,13 +48,18 @@ end
 Add multiple MetadataCategory + value pairs to MetadataContainer object.
 """
 function add_metadata(parent::MetadataContainer, values::Vector{Pair{MetadataCategory, Any}})
-    keys = first.(parent.metadata)
+    existing_keys = [x.name for x in first.(parent.metadata)]
+    
     for value in values
-        if first(value) in keys
+        category = first(value)
+        val = last(value)
+        if category.name in existing_keys
             error("Invalid key name: $(first(value)) category already exists in metadata.")
+        elseif typeof(val) != category.datatype
+            error("Invalid value type. Expected value of type $(category.datatype)")
         else
-            new_item = MetadataCategory(first(value), typeof(last(value)))
-            push!(parent.metadata, (new_item, last(value)))
+            new_item = MetadataCategory(category.name, category.datatype)
+            push!(parent.metadata, (new_item => val))
         end
     end
 end

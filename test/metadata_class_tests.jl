@@ -6,7 +6,7 @@ println()
 
 @testset "MetadataCategory Class tests" begin
     # print allowed allowed types
-    @test get_allowed_types() == Union{String, Int, Float64, Bool, Dates.Date, Vector{String}}
+    @test get_allowed_types() == Union{String, Int, Float64, Bool, Dates.Date, Dates.DateTime, Vector{String}}
     
     # error: Category with unacceptable datatype
     @test_throws MethodError  MetadataCategory("invalid", Dict)
@@ -98,12 +98,34 @@ println()
     @test typeof(first(first(md.metadata))) == MetadataCategory
     @test typeof(last(first(md.metadata))) == String
 
-    # # add string to metadata
-    # md = MetadataContainer()
-    # add_metadata(md, "title", "this is a title")
-    # @test length(md.metadata) == 1
-    # @test typeof(first(first(md.metadata))) == MetadataCategory
-    # @test typeof(last(last(md.metadata))) == String
+    # error: can't have duplicates
+    @test_throws ErrorException add_metadata(md, attribute1, "This is a second title")
+
+    # add category to metadata using strings
+    md = MetadataContainer()
+    add_metadata(md, "title", "this is a title")
+    @test length(md.metadata) == 1
+    @test typeof(first(first(md.metadata))) == MetadataCategory
+    @test typeof(last(last(md.metadata))) == String
+
+    # error: still can't have duplicates
+    @test_throws ErrorException add_metadata(md, "title", "this is a second title")
+    
+    # add multiple categories to metadata
+    md = MetadataContainer()
+    attr1 = MetadataCategory("title", String)
+    attr2 = MetadataCategory("tags", Vector{String})
+    attr3 = MetadataCategory("date", DateTime)
+    add_metadata(md, [
+        attr1 => "this is a title",
+        attr2 => [
+            "tag1",
+            "tag 2",
+            "tag 3"
+        ],
+        attr3 => Dates.now()
+    ])
+    @test length(md.metadata) == 3
 end
 
 println()
