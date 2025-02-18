@@ -19,5 +19,7 @@ makedocs(
 
 deploydocs(;
     repo="https://github.com/TheAhmir/MarkdownMetadata.jl.git",
-    branch="gh-pages"
+    branch="gh-pages",
+    devbranch="main",
+    push_preview=true
 )
