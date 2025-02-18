@@ -14,10 +14,10 @@ const allowed_types = get_allowed_types()
 Add singular MetadataCategory + value pair to MetadataContainer object.
 """
 function add_metadata(parent::MetadataContainer, key::MetadataCategory, value::Any)
-    keys = first.(parent.metadata)
+    keys = get_existing_keys(parent)
     if key.datatype != typeof(value)
         error("Value is of incorrect type. Expected type: $(key.datatype).")
-    elseif key.name in [x.name for x in keys]
+    elseif key.name in keys
         error("Invalid key name: $(key.name) category already exists in metadata.")
     else
         push!(parent.metadata, (key => value))
@@ -32,7 +32,7 @@ Add singular MetadataCategory + value pair to MetadataContainer object using Str
 """
 function add_metadata(parent::MetadataContainer, key::String, value::Any)
     # check for duplicates
-    keys = [x.name for x in first.(parent.metadata)]
+    keys = get_existing_keys(parent)
     if key in keys
         error("Invalid key name: $(key) category alread exists in metadata.")
     else
@@ -48,7 +48,7 @@ end
 Add multiple MetadataCategory + value pairs to MetadataContainer object.
 """
 function add_metadata(parent::MetadataContainer, values::Vector{Pair{MetadataCategory, Any}})
-    existing_keys = [x.name for x in first.(parent.metadata)]
+    existing_keys = get_existing_keys(parent)
     
     for value in values
         category = first(value)
@@ -58,15 +58,42 @@ function add_metadata(parent::MetadataContainer, values::Vector{Pair{MetadataCat
         elseif typeof(val) != category.datatype
             error("Invalid value type. Expected value of type $(category.datatype)")
         else
-            new_item = MetadataCategory(category.name, category.datatype)
-            push!(parent.metadata, (new_item => val))
+            push!(existing_keys, category.name)
         end
+    end
+
+    for value in values
+        category = first(value)
+        val = last(value)
+        push!(parent.metadata, (category => val))
     end
 end
 
-# # add multiple (category, value) pairs at once using string keys
-# function add_metadata(parent::MetadataContainer, values::Vector{Pair{String, Any}})
-# end
+# add multiple (category, value) pairs at once using string keys
+"""
+    add_metadata(parent::MetadataContainer, values::Vector{Pair{String, Any}})
+
+Add multiple categorie + value pairs to MetadataContainer object using strings
+"""
+function add_metadata(parent::MetadataContainer, values::Vector{Pair{String, Any}})
+    keys = get_existing_keys(parent)
+    for value in values
+        key = first(value)
+        if key in keys
+            error("Invalid key name: $(first(value)) category already exists in metadata.")
+        else
+            push!(keys, key)
+        end
+    end
+
+    for value in values
+        key = first(value)
+        val = last(value)
+        new_item = MetadataCategory(key, typeof(val))
+        push!(parent.metadata, (new_item => val))
+    end
+            
+end
 
 # # remove item
 # function remove_metadata(parent::MetadataContainer, item::MetadataCategory)

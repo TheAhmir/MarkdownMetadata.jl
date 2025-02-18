@@ -2,7 +2,7 @@ module MetadataClasses
 
 using Dates
 
-export MetadataCategory, MetadataContainer, get_allowed_types
+export MetadataCategory, MetadataContainer, get_allowed_types, get_existing_keys
 
 # only allow specific values that are accepted in markdown, Yaml, Toml, JSON, and Latex
 const ALLOWED_TYPES = Union{String, Int, Float64, Bool, Dates.Date, Dates.DateTime, Vector{String}}
@@ -97,5 +97,16 @@ struct MetadataContainer
         end
     end
 end
+
+
+"""
+    get_existing_keys(parent::MetadataContainer)
+
+Returns list of existing category names in MetadataContainer.
+"""
+function get_existing_keys(parent::MetadataContainer)
+    return [x.name for x in first.(parent.metadata)]
+end
+
 
 end
