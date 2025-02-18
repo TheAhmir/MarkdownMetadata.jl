@@ -1,6 +1,8 @@
-using Test
-using MarkdownMetadata
-using Dates
+using Test, MarkdownMetadata, Dates
+
+println()
+
+println("Executing Class Tests")
 
 println()
 
@@ -86,50 +88,4 @@ println()
     @test_throws ErrorException MetadataContainer(vector)
 end
 
-println()
-
-@testset "Add Metadata Function tests" begin
-    # add category to metadata
-    md = MetadataContainer()
-    @test length(md.metadata) == 0
-    attribute1 = MetadataCategory("title", String)
-    add_metadata(md, attribute1, "This is a title")
-    @test length(md.metadata) == 1
-    @test typeof(first(first(md.metadata))) == MetadataCategory
-    @test typeof(last(first(md.metadata))) == String
-
-    # error: can't have duplicates
-    @test_throws ErrorException add_metadata(md, attribute1, "This is a second title")
-
-    # add category to metadata using strings
-    md = MetadataContainer()
-    add_metadata(md, "title", "this is a title")
-    @test length(md.metadata) == 1
-    @test typeof(first(first(md.metadata))) == MetadataCategory
-    @test typeof(last(last(md.metadata))) == String
-
-    # error: still can't have duplicates
-    @test_throws ErrorException add_metadata(md, "title", "this is a second title")
-    
-    # add multiple categories to metadata
-    md = MetadataContainer()
-    attr1 = MetadataCategory("title", String)
-    attr2 = MetadataCategory("tags", Vector{String})
-    attr3 = MetadataCategory("date", DateTime)
-    add_metadata(md, [
-        attr1 => "this is a title",
-        attr2 => [
-            "tag1",
-            "tag 2",
-            "tag 3"
-        ],
-        attr3 => Dates.now()
-    ])
-    @test length(md.metadata) == 3
-end
-
-println()
-
-@testset "Update Metadata Function tests" begin
-    @test true == true
-end
+println("---")
