@@ -15,5 +15,8 @@ makedocs(
             "Metadata Functions" => "api/functions.md"
         ]
     ],
-    remotes = nothing
+)
+
+deploydocs(;
+    repo="https://github.com/TheAhmir/MarkdownMetadata.jl.git"
 )
