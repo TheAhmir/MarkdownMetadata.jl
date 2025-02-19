@@ -2,7 +2,7 @@ module MetadataFunctions
 
 using MarkdownMetadata.MetadataClasses
 
-export add_metadata, update_metadata
+export add_metadata, update_metadata, clear_metadata
 
 # initialize variable for function type checking
 const allowed_types = get_allowed_types()
@@ -111,9 +111,15 @@ end
 # function remove_metadata(parent::MetadataContainer, items::Vector{String})
 # end
 
-# # clear all pairs
-# function clear_metadata(parent::MetadataContainer)
-# end
+# clear all pairs
+"""
+    clear_metadata(parent::MetadataContainer)
+
+Removes all elements in MetadataContainer.
+"""
+function clear_metadata(parent::MetadataContainer)
+    empty!(parent.metadata)
+end
 
 # update value associated with a category using raw data
 """
@@ -122,12 +128,12 @@ end
 Update value in MetadataContainer object using associated string key.
 """
 function update_metadata(parent::MetadataContainer, name::String, value::Any)
-    occurences = [index for (index,item) in enumerate(parent.metadata) if first(item.name) == name]
+    occurences = [index for (index,item) in enumerate(parent.metadata) if first(item).name == name]
     if length(occurences) != 1
         error("An undetected error occured in the creation of metadata -- duplicate keys found. Please re-initialize metadata.")
     else
-        key = parent.metadata[first(occurences)]
-        if typeof(value) == last(key)                        
+        key = first(parent.metadata[first(occurences)])
+        if typeof(value) == key.datatype                        
             new_pair = (key => value)
             parent.metadata[first(occurences)] = new_pair
         else
@@ -143,19 +149,19 @@ end
 Update value in MetadataContainer object using associated MetadataCategory.
 """
 function update_metadata(parent::MetadataContainer, category::MetadataCategory, value::Any)
+    index = [index for (index, item) in enumerate(parent.metadata) if first(item).name == category.name]
     type = category.datatype
-    if typeof(value) != type
+    if length(index) != 1
+        error("A mistake was made. Found duplicate entries for key value $(category.name) in MetadataContainer")
+    elseif typeof(value) != type
         error("Unexpected type $(typeof(value)). Expected value of type $type.")
     else
         # find correct category and update value
-        new_data = [first(item) == category ? category => value : item for item in parent.metadata]
-        parent.metadata = new_data
+        parent.metadata[index[1]] =  (category => value)
     end
 end
 
-# function read_metadata(path::String)
-# end
-
+# update metadata key
 
 
 end

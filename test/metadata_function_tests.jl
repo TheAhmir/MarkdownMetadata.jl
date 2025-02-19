@@ -85,8 +85,34 @@ end
 
 println()
 
+@testset "Clear Metadata Function tests" begin
+    md = MetadataContainer()
+    add_metadata(md, "title", "this is a title")
+    @test length(md.metadata) == 1
+    clear_metadata(md)
+    @test length(md.metadata) == 0
+end
+
+println()
+
 @testset "Update Metadata Function tests" begin
-    @test true == true
+    # update value of key in MetadataContainer using a string
+    md = MetadataContainer(
+        ["title" => "this is a title"]
+    )
+    @test length(md.metadata) == 1
+    @test last(md.metadata[1]) == "this is a title"
+
+    update_metadata(md, "title", "this title has been changed")
+    @test length(md.metadata) == 1
+    @test last(md.metadata[1]) == "this title has been changed"
+
+    # update value of key in MetadataContainer using exact MetadataCategory
+    md = MetadataContainer()
+    attr1 = MetadataCategory("title", String)
+    add_metadata(md, attr1, "this is a title")
+    update_metadata(md, attr1, "changed title")
+    @test last(md.metadata[1]) == "changed title"
 end
 
 println("---")
