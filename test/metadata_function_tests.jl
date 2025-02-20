@@ -113,6 +113,49 @@ println()
     add_metadata(md, attr1, "this is a title")
     update_metadata(md, attr1, "changed title")
     @test last(md.metadata[1]) == "changed title"
+
+    # update key name
+    update_category_name(md, attr1, "titletitle")
+    @test first(md.metadata[1]).name == "titletitle"
+    @test last(md.metadata[1]) == "changed title"
+
+
+    # update key name using string
+    add_metadata(md, "date", Dates.now())
+    update_category_name(md, "titletitle", "title")
+    @test first(md.metadata[1]).name == "title"
+    @test last(md.metadata[1]) == "changed title"
+end
+
+println()
+
+@testset "Remove Metadata Function tests" begin
+    md = MetadataContainer([
+        "title" => "Watch this",
+        "createdat" => Dates.now(),
+    ])
+    add_metadata(md, [
+        "tags" => [
+            "tag",
+            "another tag"
+        ]
+    ])
+    @test length(md.metadata) == 3
+
+    remove_metadata(md, "title")
+    @test length(md.metadata) == 2
+
+    attr = MetadataCategory("title", String)
+    add_metadata(md, attr, "Watch this again")
+    @test length(md.metadata) == 3
+
+    remove_metadata(md, attr)
+    @test length(md.metadata) == 2
+
+    remove_metadata(md, "tags")
+    @test length(md.metadata) == 1
+    
 end
 
 println("---")
+

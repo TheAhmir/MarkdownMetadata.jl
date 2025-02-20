@@ -2,7 +2,7 @@ module MetadataFunctions
 
 using MarkdownMetadata.MetadataClasses
 
-export add_metadata, update_metadata, clear_metadata
+export add_metadata, update_metadata, clear_metadata, update_category_name, remove_metadata
 
 # initialize variable for function type checking
 const allowed_types = get_allowed_types()
@@ -47,7 +47,7 @@ end
 
 Add multiple MetadataCategory + value pairs to MetadataContainer object.
 """
-function add_metadata(parent::MetadataContainer, values::Vector{Pair{MetadataCategory, Any}})
+function add_metadata(parent::MetadataContainer, values::Vector{Pair{MetadataCategory, T}}) where T
     existing_keys = get_existing_keys(parent)
     
     for value in values
@@ -75,7 +75,7 @@ end
 
 Add multiple categorie + value pairs to MetadataContainer object using strings
 """
-function add_metadata(parent::MetadataContainer, values::Vector{Pair{String, Any}})
+function add_metadata(parent::MetadataContainer, values::Vector{Pair{String, T}}) where T
     keys = get_existing_keys(parent)
     for value in values
         key = first(value)
@@ -95,13 +95,35 @@ function add_metadata(parent::MetadataContainer, values::Vector{Pair{String, Any
             
 end
 
-# # remove item
-# function remove_metadata(parent::MetadataContainer, item::MetadataCategory)
-# end
+# remove item
+"""
+    remove_metadata(parent::MetadataContainer, item::MetadataCategory)
 
-# # remove item using string
-# function remove_metadata(parent::MetadataContainer, item::String)
-# end
+Remove MetadataCategory from MetadataContainer.
+"""
+function remove_metadata(parent::MetadataContainer, item::MetadataCategory)
+    index = findfirst(x -> first(x).name == item.name && first(x).datatype == item.datatype, parent.metadata)
+    if !isnothing(index)
+        deleteat!(parent.metadata, index)
+    else
+        error("Could not find category with name $(item.name) in MetadataContainer.")
+    end
+end
+
+# remove item using string
+"""
+    remove_metadata(parent::MetadataContainer, item_name::String)    
+
+Remove MetadataCategory from MetadataContainer using string name.
+"""
+function remove_metadata(parent::MetadataContainer, item_name::String)
+    index = findfirst(x -> first(x).name == item_name, parent.metadata)
+    if !isnothing(index)
+        deleteat!(parent.metadata, index)
+    else
+        error("Could not find category with name $(item_name) in MetadataContainer.")
+    end
+end
 
 # # remove multiple items
 # function remove_metadata(parent::MetadataContainer, items::Vector{MetadataCategory})
@@ -162,6 +184,47 @@ function update_metadata(parent::MetadataContainer, category::MetadataCategory, 
 end
 
 # update metadata key
+"""
+    update_category_name(parent::MetadataContainer, category::MetadataCategory, name::String)
 
+Update key name of category in MetadataContainer.
+"""
+function update_category_name(parent::MetadataContainer, category::MetadataCategory, name::String)
+    if contains(name, " ")
+        error("Whitespace is not allowed in category name.")
+    end
+    
+    index = findfirst(x -> first(x).name == category.name && first(x).datatype == category.datatype, parent.metadata)
+
+    if  !isnothing(index)
+        old_item = parent.metadata[index]
+        new_item = MetadataCategory(name, first(old_item).datatype)
+        parent.metadata[index] = (new_item => last(old_item))
+    else
+        error("Could not find $(category.name) in MetadataContainer.")
+    end
+end
+
+"""
+    update_category_name(parent::MetadataContainer, old_name::String, new_name::String)
+
+Update key name of category in MetadataContainer using string name    
+"""
+function update_category_name(parent::MetadataContainer, old_name::String, new_name::String)
+    if contains(new_name, " ")
+        error("Whitespace is not allowed in category name.")
+    end
+    
+    index = findfirst(x -> first(x).name == old_name, parent.metadata)
+
+    if  !isnothing(index)
+        old_item = parent.metadata[index]
+        new_item = MetadataCategory(new_name, first(old_item).datatype)
+        parent.metadata[index] = (new_item => last(old_item))
+    else
+        error("Could not find $(old_name) in MetadataContainer.")
+    end
+
+end
 
 end

@@ -21,7 +21,7 @@ end
 """
     MetadataCategory
 """
-struct MetadataCategory
+mutable struct MetadataCategory
     name::String
     datatype::Type
     """
